@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Dashboard</title>
+  <style>
+    body { font-family: Arial; max-width: 1100px; margin: 24px auto; }
+    table { width:100%; border-collapse: collapse; }
+    th, td { border-bottom: 1px solid #eee; padding: 10px; text-align:left; }
+    .box { background: #fafafa; border: 1px solid #ddd; padding: 16px; border-radius: 10px; margin-bottom: 16px;}
+    input { padding: 6px; }
+    a { text-decoration:none; }
+  </style>
+</head>
+<body>
+  <h1>Dashboard</h1>
+
+  <div class="box">
+    <form method="post" action="/dashboard/store/save?admin_key={{admin_key}}">
+      <h3>Guardar tienda (manual)</h3>
+      <p>TN Store ID: <input name="tn_store_id" required></p>
+      <p>TN Access Token: <input name="tn_access_token" style="width:650px" required></p>
+      <p>MP Access Token (opcional): <input name="mp_access_token" style="width:650px"></p>
+      <button type="submit">Guardar</button>
+    </form>
+    <p style="color:#666;margin-top:8px;">
+      Si instalás por OAuth, el token se guarda solo. Esto es solo por si querés pegarlo manual.
+    </p>
+  </div>
+
+  <div class="box">
+    <h3>Tiendas</h3>
+    <table>
+      <tr><th>TN Store ID</th><th>MP token</th><th>Reglas</th></tr>
+      {% for s in stores %}
+        <tr>
+          <td>{{s["tn_store_id"]}}</td>
+          <td>{{ "Sí" if s["mp_access_token"] else "Default/No" }}</td>
+          <td><a href="/dashboard/{{s['tn_store_id']}}/rules?admin_key={{admin_key}}">Ver reglas</a></td>
+        </tr>
+      {% endfor %}
+    </table>
+  </div>
+</body>
+</html>

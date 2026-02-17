@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"/><title>Split Done</title></head>
+<body style="font-family:Arial;max-width:900px;margin:24px auto;">
+  <h1>Estado del split</h1>
+  <p><b>Split:</b> {{split_id}}</p>
+  <p><b>Status:</b> {{status}}</p>
+  <h3>Pagos</h3>
+  <ul>
+    {% for p in payments %}
+      <li>{{p["group_key"]}} — {{p["status"]}} — payment_id: {{p["mp_payment_id"] or "-"}}</li>
+    {% endfor %}
+  </ul>
+</body>
+</html>

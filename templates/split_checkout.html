@@ -1,0 +1,100 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Split Checkout</title>
+  <style>
+    body { font-family: Arial; max-width: 1100px; margin: 24px auto; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .box { background: #fafafa; border: 1px solid #ddd; padding: 16px; border-radius: 10px; }
+    ul { margin: 0; padding-left: 18px; }
+    select { padding:6px; }
+    .btn { display:inline-block; padding: 10px 14px; border-radius: 10px; background:#111; color:#fff; text-decoration:none; }
+    .btn2 { display:inline-block; padding: 10px 14px; border-radius: 10px; background:#2b6; color:#fff; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <h1>Compra con pagos separados</h1>
+  <p>Split ID: <b>{{split_id}}</b></p>
+
+  <div class="grid">
+    <div class="box">
+      <h3>Grupo 12 cuotas</h3>
+      <ul>
+      {% for it in groups["group_12"]["items"] %}
+        <li>{{it["name"]}} x{{it["quantity"]}} - ${{it["price"]}}</li>
+      {% endfor %}
+      </ul>
+      <p><b>Subtotal:</b> ${{groups["group_12"]["subtotal"]}}</p>
+    </div>
+
+    <div class="box">
+      <h3>Grupo 6 cuotas</h3>
+      <ul>
+      {% for it in groups["group_6"]["items"] %}
+        <li>{{it["name"]}} x{{it["quantity"]}} - ${{it["price"]}}</li>
+      {% endfor %}
+      </ul>
+      <p><b>Subtotal:</b> ${{groups["group_6"]["subtotal"]}}</p>
+    </div>
+  </div>
+
+  {% if groups["group_0"]["items"]|length > 0 %}
+  <div class="box" style="margin-top:16px;">
+    <h3>Grupo 0 cuotas</h3>
+    <ul>
+    {% for it in groups["group_0"]["items"] %}
+      <li>{{it["name"]}} x{{it["quantity"]}} - ${{it["price"]}}</li>
+    {% endfor %}
+    </ul>
+    <p><b>Subtotal:</b> ${{groups["group_0"]["subtotal"]}}</p>
+  </div>
+  {% endif %}
+
+  <div class="box" style="margin-top:16px;">
+    <h3>Envío (1 sola vez)</h3>
+    <form method="post" action="/split/{{split_id}}/shipping">
+      <p>Método:
+        <select name="shipping_method">
+          <option value="retiro">Retiro (gratis)</option>
+          <option value="estandar">Estándar ($2500)</option>
+          <option value="express">Express ($4500)</option>
+        </select>
+      </p>
+      <p>¿En qué pago lo abonás?
+        <select name="shipping_paid_in_group">
+          {% if groups["group_12"]["items"]|length > 0 %}<option value="group_12">En Grupo 12</option>{% endif %}
+          {% if groups["group_6"]["items"]|length > 0 %}<option value="group_6">En Grupo 6</option>{% endif %}
+          {% if groups["group_0"]["items"]|length > 0 %}<option value="group_0">En Grupo 0</option>{% endif %}
+        </select>
+      </p>
+      <button type="submit">Guardar envío</button>
+    </form>
+
+    <p style="margin-top:10px;">
+      Envío actual: <b>{{shipping_method or "-"}}</b> — costo: <b>${{shipping_cost}}</b> — se cobra en: <b>{{shipping_paid_in_group or "-"}}</b>
+    </p>
+  </div>
+
+  <div class="box" style="margin-top:16px;">
+    <h3>Pagos</h3>
+    <a class="btn" href="/split/{{split_id}}/generate_payments">Generar links de pago</a>
+
+    {% if payments|length > 0 %}
+      <hr/>
+      {% for p in payments %}
+        <p>
+          <b>{{p["group_key"]}}</b> — estado: {{p["status"]}}<br/>
+          {% if p["mp_init_point"] %}
+            <a class="btn2" href="{{p['mp_init_point']}}" target="_blank">Pagar este grupo</a>
+          {% endif %}
+        </p>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  <div class="box" style="margin-top:16px;">
+    <a class="btn" href="/split/{{split_id}}/done">Ver estado</a>
+  </div>
+</body>
+</html>
